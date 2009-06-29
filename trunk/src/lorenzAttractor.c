@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 			case '?': /* wrong options */
 				fprintf (stderr,
 						 "Usage: lorenzAttractor [OPTION]\n"
-						 "Numerical calculation of Lorenz Attractors.\n"
+						 "Numerical solution for Lorenz Attractors problem.\n"
 						 
 						 "\n"
 						 
