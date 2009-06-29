@@ -1,17 +1,16 @@
 # Source, Executable, Includes, Library Defines
 SRC  = src/lorenzAttractor.c
 OBJ  = $(SRC:.c=.o)
-LIBS = -lm -ldl
+LIBS = -lm
 EXE  = bin/lorenzAttractor
 
 # Compiler, Linker Defines
 CPP      = /usr/bin/gcc
 CPPFLAGS = -Wall -ansi -pedantic -g -O3 -funroll-loops
 
-LIBPATH  = -L/usr/local/lib
+LIBPATH  =
 
 INCLPATH = -I./include/ 
-INCLPATH+= -I/usr/local/include 
 
 RM       = /bin/rm -f
 

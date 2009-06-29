@@ -1,3 +1,6 @@
+#ifndef __RK_H__
+#define __RK_H__
+
 /* Runge-Kutta routine (rk.h) */
 
 /*
@@ -15,39 +18,6 @@
 ** x(t + h) = x(t) + d1 / 6 + d2 / 3 + d3 / 3 + d4 / 6,
 ** , where 'h' is the size of discretized time, and is the Runge-Kutta step.
 */
-
-#include <stdlib.h>
-#include <string.h>
-
-/* Allocating vector region */
-double *vector(int N)
-{
-	/*
-	** Dynamically allocating an array using "malloc".
-	** The size of the array is 'N'.
-	*/
-	return (double *)malloc(N * sizeof(double));
-}
-
-/* Releasing vector region */
-void free_vector(double *v)
-{
-	/* Releasing the region of the pointer 'v'. */
-	free(v);
-}
-
-/* Copying the vector 'a' to the vector 'b' */
-void copy_vector(int N, double a[], double b[])
-{
-	/*
-	int i;
-
-	for(i = 0; i < N ; i++) 
-		b[i] = a[i];
-	*/
-		
-	memcpy(b, a, N*sizeof(double));
-}
 
 /*
 ** Putting the Runge-Kutta step 'h,' the rank of the differential equation N,
@@ -78,7 +48,7 @@ void rk(double h, int N, void (*dXdt)(double t, double X[], double dXdt[]),
 
 	/* d1 = hF(x(t), t) */
 	dXdt(t, X0, dX);
-	for(i = 0; i <= N - 1; i++)
+	for(i = 0; i < N; i++)
 	{
 		d1[i] = h * dX[i];
 		Xa[i] = X0[i] + 0.5 * d1[i];
@@ -86,7 +56,7 @@ void rk(double h, int N, void (*dXdt)(double t, double X[], double dXdt[]),
 
 	/* d2 = hF(x(t) + d1 / 2, t + h / 2) */
 	dXdt(t + 0.5 * h, Xa, dX);
-	for(i = 0; i <= N - 1; i++)
+	for(i = 0; i < N; i++)
 	{
 		d2[i] = h * dX[i];
 		Xa[i] = X0[i] + 0.5 * d2[i];
@@ -94,7 +64,7 @@ void rk(double h, int N, void (*dXdt)(double t, double X[], double dXdt[]),
 
 	/* d3 = hF(x(t) + d2 / 2, t + h / 2) */ 
 	dXdt(t + 0.5 * h, Xa, dX);
-	for(i = 0; i <= N-1; i++)
+	for(i = 0; i < N; i++)
 	{
 		d3[i] = h * dX[i];
 		Xa[i] = X0[i] + d3[i];
@@ -102,10 +72,13 @@ void rk(double h, int N, void (*dXdt)(double t, double X[], double dXdt[]),
 
 	/* x(t + h) = x(t) + d1 / 6 + d2 / 3 + d3 / 3 */
 	dXdt(t + h, Xa, dX);
-	for(i = 0; i <= N - 1; i++)
+	for(i = 0; i < N; i++)
 		X[i] = X0[i] + (d1[i] + d2[i] * 2 + d3[i] * 2 + h * dX[i]) / 6.0;
 
 	/* Releasing the regions of arrays */
 	free_vector(d1); free_vector(d2); free_vector(d3);
 	free_vector(Xa); free_vector(dX);
 }
+
+#endif /* __RK_H__ */
+
