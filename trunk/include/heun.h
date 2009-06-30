@@ -22,7 +22,7 @@ void heun(double h, int N, void (*dXdt)(double t, double X[], double dXdt[]),
 {
 	int i;
 	/* 
-	 ** Dynamically allocating arrays for 'double Xa[N]', 'double Y1[N]' and 'double Y2[N]'.
+	 ** Dynamically allocating arrays for 'double Xa[N]', 'double K1[N]' and 'double K2[N]'.
 	 */
 	double *Xa = vector(N),
 	       *K1 = vector(N),
