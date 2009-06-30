@@ -16,23 +16,41 @@
 */
 
 /* Explicit Euler Method  */
-void euler(double h, int N, void (*dXdt)(double t, double X[], double dXdt[]),
-	double t, double X0[], double X[])
+int _eulerIsIstarted = 0;
+int _eulerN;
+double *_eulerdX;
+
+void euler_setUp(int N)
 {
-	int i;
+	_eulerN = N;
+	
 	/* 
 	** Dynamically allocating arrays for 'double X[N]'.
 	*/
-	double *dX = vector(N);
+	_eulerdX = vector(_eulerN);
+	_eulerIsIstarted = 1;
+}
 
-	/* x(t + h) = x(t) + hF(x(t), t) */
-	dXdt(t, X0, dX);
-	for(i = 0; i < N; i++)
-	{
-		X[i] = X0[i] + h * dX[i];
-	}
+void euler_Free()
+{
+	free_vector(_eulerdX);
+	_eulerIsIstarted = 0;
+}
+
+void euler(double h, void (*dXdt)(double t, double X[], double dXdt[]),
+	double t, double X0[], double X[])
+{
+	int i;
 	
-	free_vector(dX);
+	if(!_eulerIsIstarted)
+	{ return; }
+	
+	/* x(t + h) = x(t) + hF(x(t), t) */
+	dXdt(t, X0, _eulerdX);
+	for(i = 0; i < _eulerN; i++)
+	{
+		X[i] = X0[i] + h * _eulerdX[i];
+	}
 }
 
 #endif /* __EULER_H__ */

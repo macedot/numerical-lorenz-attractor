@@ -33,7 +33,7 @@ IF NOT EXIST test2 mkdir test2
 set xa=%x%
 set ya=%y%
 set za=%z%
-set xb=%x% + %EPS%
+set xb=%x%%EPS%
 set yb=%y%
 set zb=%z%
 
@@ -62,7 +62,7 @@ set xa=%x%
 set ya=%y%
 set za=%z%
 set xb=%x%
-set yb=%y% + %EPS%
+set yb=%y%%EPS%
 set zb=%z%
 
 @echo Test3: Same Methods, epsilon-diff y initial condition
@@ -91,7 +91,7 @@ set ya=%y%
 set za=%z%
 set xb=%x%
 set yb=%y%
-set zb=%z% + %EPS%
+set zb=%z%%EPS%
 
 @echo Test4: Same Methods, epsilon-diff z initial condition
 @echo x1 = %xa%
