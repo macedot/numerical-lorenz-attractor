@@ -6,7 +6,7 @@ EXE  = bin/lorenzAttractor
 
 # Compiler, Linker Defines
 CPP      = /usr/bin/gcc
-CPPFLAGS = -Wall -ansi -pedantic -g -O3 -funroll-loops
+CPPFLAGS = -Wall -ansi -pedantic -g -O3 -funroll-loops -ftree-vectorize
 
 LIBPATH  =
 
