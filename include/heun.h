@@ -22,19 +22,27 @@ void heun(double h, int N, void (*dXdt)(double t, double X[], double dXdt[]),
 {
 	int i;
 	/* 
-	 ** Dynamically allocating arrays for 'double X[N]'.
+	 ** Dynamically allocating arrays for 'double Xa[N],' and 'double X[N]'.
 	 */
-	double *dX = vector(N);
+	double *Xa = vector(N),
+	       *dX = vector(N);
 	
-	/* x(t + h) = x(t) + hF(x(t), t) */
+	/* Xa = X0 * hF(x(t), t) */
 	dXdt(t, X0, dX);
 	for(i = 0; i < N; i++)
 	{
-		X[i] = X0[i] + h * dX[i];
+		Xa[i] = X0[i] + h * dX[i];
 	}
 	
-	free_vector(dX);
+	/* x(t + h) = x(t) + h * ( F(x(t), t) + F(x_tilde, t + h)) / 2 */
+	dXdt(t + h, Xa, dX);
+	for(i = 0; i < N; i++)
+	{
+		X[i] = X0[i] + h * (Xa[i] + dX[i]) / 2.0;
+	}
+	
+	/* Releasing the regions of arrays */
+	free_vector(Xa); free_vector(dX);
 }
 
 #endif /* __HEUN_H__ */
-#define __EULER_H__
