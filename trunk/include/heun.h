@@ -17,32 +17,52 @@
  */
 
 /* Heun Method  */
-void heun(double h, int N, void (*dXdt)(double t, double X[], double dXdt[]),
-		   double t, double X0[], double X[])
+int _heunIsIstarted = 0;
+int _heunN;
+double *_heunXa, *_heunK1, *_heunK2;
+
+void heun_setUp(int N)
 {
-	int i;
+	_heunN = N;
+	
 	/* 
 	 ** Dynamically allocating arrays for 'double Xa[N]', 'double K1[N]' and 'double K2[N]'.
 	 */
-	double *Xa = vector(N),
-	       *K1 = vector(N),
-	       *K2 = vector(N);
-	/* Xa = X0 * hF(x(t), t) */
-	dXdt(t, X0, K1);
-	for(i = 0; i < N; i++)
+	_heunXa = vector(_heunN);
+	_heunK1 = vector(_heunN);
+	_heunK2 = vector(_heunN);
+	_heunIsIstarted = 1;
+}
+
+void heun_Free()
+{
+	free_vector(_heunXa);
+	free_vector(_heunK1);
+	free_vector(_heunK2);
+	_heunIsIstarted = 0;
+}
+
+void heun(double h, void (*dXdt)(double t, double X[], double dXdt[]),
+		   double t, double X0[], double X[])
+{
+	int i;
+	
+	if(!_heunIsIstarted)
+	{ return; }
+	 
+	/* Xa = X0 + h * F(x(t), t) */
+	dXdt(t, X0, _heunK1);
+	for(i = 0; i < _heunN; i++)
 	{
-		Xa[i] = X0[i] + h * K1[i];
+		_heunXa[i] = X0[i] + h * _heunK1[i];
 	}
 	
 	/* x(t + h) = x(t) + h * ( F(x(t), t) + F(x_tilde, t + h)) / 2 */
-	dXdt(t + h, Xa, K2);
-	for(i = 0; i < N; i++)
+	dXdt(t + h, _heunXa, _heunK2);
+	for(i = 0; i < _heunN; i++)
 	{
-		X[i] = X0[i] + h * (K1[i] + K2[i]) / 2.0;
+		X[i] = X0[i] + h * (_heunK1[i] + _heunK2[i]) / 2.0;
 	}
-	
-	/* Releasing the regions of arrays */
-	free_vector(Xa); free_vector(K1); free_vector(K2);
 }
 
 #endif /* __HEUN_H__ */

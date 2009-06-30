@@ -29,55 +29,78 @@
 */
 
 /* Runge-Kutta 4 - 4  */
-void rk(double h, int N, void (*dXdt)(double t, double X[], double dXdt[]),
-	double t, double X0[], double X[])
+/* Explicit Euler Method  */
+int _rkIsIstarted = 0;
+int _rkN;
+double *_rkd1, *_rkd2, *_rkd3;
+double *_rkXa, *_rkdX ;
+
+void rk_setUp(int N)
 {
-	int i;
+	_rkN = N;
+	
 	/* 
 	** Dynamically allocating arrays for 'double d1[N],' 'double d2[N],'
 	** and 'double d3[N]'.
 	*/
-	double *d1 = vector(N), 
-	       *d2 = vector(N),
-	       *d3 = vector(N);
+	_rkd1 = vector(_rkN), 
+	_rkd2 = vector(_rkN),
+	_rkd3 = vector(_rkN);
 	/* 
 	** Dynamically allocating arrays for 'double Xa[N],' and 'double X[N]'.
 	*/
-	double *Xa = vector(N),
-	       *dX = vector(N);
+	_rkXa = vector(_rkN),
+	_rkdX = vector(_rkN);
+	_rkIsIstarted = 1;
+}
 
+void rk_Free()
+{
+	free_vector(_rkd1);
+	free_vector(_rkd2);
+	free_vector(_rkd3);
+	free_vector(_rkXa);
+	free_vector(_rkdX);
+	_rkIsIstarted = 0;
+}
+
+void rk(double h, void (*dXdt)(double t, double X[], double dXdt[]),
+	double t, double X0[], double X[])
+{
+	int i;
+	
+	if(!_rkIsIstarted)
+	{ return; }
+	
 	/* d1 = hF(x(t), t) */
-	dXdt(t, X0, dX);
-	for(i = 0; i < N; i++)
+	dXdt(t, X0, _rkdX);
+	for(i = 0; i < _rkN; i++)
 	{
-		d1[i] = h * dX[i];
-		Xa[i] = X0[i] + 0.5 * d1[i];
+		_rkd1[i] = h * _rkdX[i];
+		_rkXa[i] = X0[i] + 0.5 * _rkd1[i];
 	}
 
 	/* d2 = hF(x(t) + d1 / 2, t + h / 2) */
-	dXdt(t + 0.5 * h, Xa, dX);
-	for(i = 0; i < N; i++)
+	dXdt(t + 0.5 * h, _rkXa, _rkdX);
+	for(i = 0; i < _rkN; i++)
 	{
-		d2[i] = h * dX[i];
-		Xa[i] = X0[i] + 0.5 * d2[i];
+		_rkd2[i] = h * _rkdX[i];
+		_rkXa[i] = X0[i] + 0.5 * _rkd2[i];
 	}
 
 	/* d3 = hF(x(t) + d2 / 2, t + h / 2) */ 
-	dXdt(t + 0.5 * h, Xa, dX);
-	for(i = 0; i < N; i++)
+	dXdt(t + 0.5 * h, _rkXa, _rkdX);
+	for(i = 0; i < _rkN; i++)
 	{
-		d3[i] = h * dX[i];
-		Xa[i] = X0[i] + d3[i];
+		_rkd3[i] = h * _rkdX[i];
+		_rkXa[i] = X0[i] + _rkd3[i];
 	}
 
 	/* x(t + h) = x(t) + d1 / 6 + d2 / 3 + d3 / 3 */
-	dXdt(t + h, Xa, dX);
-	for(i = 0; i < N; i++)
-		X[i] = X0[i] + (d1[i] + d2[i] * 2 + d3[i] * 2 + h * dX[i]) / 6.0;
-
-	/* Releasing the regions of arrays */
-	free_vector(d1); free_vector(d2); free_vector(d3);
-	free_vector(Xa); free_vector(dX);
+	dXdt(t + h, _rkXa, _rkdX);
+	for(i = 0; i < _rkN; i++)
+	{ X[i] = X0[i] + (_rkd1[i] + _rkd2[i] * 2 + _rkd3[i] * 2 + h * _rkdX[i]) / 6.0; }
+	
 }
 
 #endif /* __RK_H__ */

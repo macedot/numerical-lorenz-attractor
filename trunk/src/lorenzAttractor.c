@@ -42,8 +42,10 @@
       double time_step  = 0.01;     /* Time step (h) */
 unsigned int time_final = 10000;    /* Numbers of steps in time */
 
-void (*numericalMethod)(double, int, void (*)(double, double [], double []), 
+void (*numericalSetUp)(int);
+void (*numericalMethod)(double, void (*)(double, double [], double []), 
 						double, double [], double []);
+void (*numericalFree)();
 
 int main(int argc, char *argv[])
 {
@@ -68,6 +70,8 @@ int main(int argc, char *argv[])
 	
 	/* Initial setting */
 	numericalMethod = rk;
+	numericalSetUp = rk_setUp;
+	numericalFree = rk_Free;
 	X0[0] = 10.0;
 	X0[1] = 20.0;
 	X0[2] = 30.0;	
@@ -77,12 +81,18 @@ int main(int argc, char *argv[])
 		switch ((c = getopt_long (argc, argv, "ehras:t:x:y:z:", long_options, &option_index))) {
 			case 'e': /* euler */
 				numericalMethod = euler;
+				numericalSetUp = euler_setUp;
+				numericalFree = euler_Free;
 				break;
 			case 'h': /* heun */
 				numericalMethod = heun;
+				numericalSetUp = heun_setUp;
+				numericalFree = heun_Free;
 				break;
 			case 'r': /* runge-kutta 4-4 */
 				numericalMethod = rk;
+				numericalSetUp = rk_setUp;
+				numericalFree = rk_Free;
 				break;
 				
 			case 's': /* time step */
@@ -120,7 +130,7 @@ int main(int argc, char *argv[])
 						 "  -x   --init-x VALUE			initial condition for x\n"
 						 "  -y   --init-y VALUE			initial condition for y\n"
 						 "  -z   --init-z VALUE			initial condition for z\n"
-
+						 
 						 "  -a   --help					display this help and exit\n"
 						 
 						 "\n"
@@ -130,7 +140,7 @@ int main(int argc, char *argv[])
 				return (c != 'a'); /* success or failure */
 		}
 	}
-
+	
 	/* Main part */
 	for(i = 0; i < N; i++)
 	{
@@ -139,13 +149,14 @@ int main(int argc, char *argv[])
 		else putchar(' ');
 	}
 	
+	numericalSetUp(N);
 	for(t = 0; t < time_final; t++)
 	{
 		/*
 		** Putting the function 'lorenz' and the state variable 'X0' at time 'h*t'
 		** to get the state variable 'X1' at time 'h*(t+1)'.
 		*/
-		numericalMethod(time_step, N, lorenz, time_step*t, X0, X1);
+		numericalMethod(time_step, lorenz, time_step*t, X0, X1);
 		copy_vector(N, X1, X0);
 		
 		for(i = 0; i < N; i++)
@@ -153,8 +164,9 @@ int main(int argc, char *argv[])
 			printf("%f", X0[i]);
 			if(i == (N - 1)) putchar('\n');
 			else putchar(' ');
-		}		
+		}
 	}
-
+	numericalFree();
+	
 	return 0;
 }
