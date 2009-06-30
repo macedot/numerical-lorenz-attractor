@@ -34,95 +34,126 @@
 #include "lorenzAttractor.h" /* lorenz(double t, double X[], double dXdt[]) */
 
 #define N 3			/* dimension of state variable */
-#define h 0.01		/* Time step */
-#define T 10000		/* Numbers of steps in time */
 
 #ifndef EOF
 #define EOF (-1)
 #endif
 
-/*
-void (*numericalMethod)(double h, int N, void (*dXdt)(double t, double X[], double dXdt[]), 
-						double t, double X0[], double X[]);
-*/
+      double time_step  = 0.01;     /* Time step (h) */
+unsigned int time_final = 10000;    /* Numbers of steps in time */
+
+void (*numericalMethod)(double, int, void (*)(double, double [], double []), 
+						double, double [], double []);
 
 int main(int argc, char *argv[])
 {
-	int t, i;
+	unsigned int i, t;
+	
 	/* Dynamically allocating arrays for 'double X0[N],' and 'double X1[N]'. */
 	double *X0 = vector(N),
 	       *X1 = vector(N);
 	
-	/* TODO : Parametro na linha de comando para selecionar o metodo; */
-	/* TODO : Parametro na linha de comando para informar as condicoes iniciais e o passo no tempo; */
-
 	static struct option long_options[] = {
-	/* {"heun" , required_argument, NULL, 's'}, */
-		{"euler", no_argument , NULL, 'e'},
-		{"heun" , no_argument , NULL, 'h'},
-		{"rk"   , no_argument , NULL, 'r'},
-		{"help" , no_argument , NULL, 'a'},
+		{"euler"  , no_argument       , NULL , 'e'},
+		{"heun"   , no_argument       , NULL , 'h'},
+		{"rk"     , no_argument       , NULL , 'r'},
+		{"help"   , no_argument       , NULL , 'a'},
+		{"init-x" , required_argument , NULL , 'x'},
+		{"init-y" , required_argument , NULL , 'y'},
+		{"init-z" , required_argument , NULL , 'z'},
 		{ NULL }
 	};
 	int option_index = 0;
 	int c = 0;
 	
 	/* Initial setting */
+	numericalMethod = rk;
 	X0[0] = 10.0;
 	X0[1] = 20.0;
 	X0[2] = 30.0;	
-	/* numericalMethod = rk; */
 	 
 	/* parse options using getopt */
 	while (c != EOF) {
-		switch ((c = getopt_long (argc, argv, "ehra", long_options, &option_index))) {
-		/* geodesation_order = (guint) atoi (optarg); */
+		switch ((c = getopt_long (argc, argv, "ehras:t:x:y:z:", long_options, &option_index))) {
 			case 'e': /* euler */
-				/* numericalMethod = euler; */
+				numericalMethod = euler;
 				break;
 			case 'h': /* heun */
-				/* numericalMethod = heun; */
+				numericalMethod = heun;
 				break;
 			case 'r': /* runge-kutta 4-4 */
-				/* numericalMethod = rk; */
+				numericalMethod = rk;
 				break;
+				
+			case 's': /* time step */
+				time_step = (double) atof(optarg);
+				break;
+			case 't': /* final time */
+				time_final = (unsigned int) atoi(optarg);
+				break;
+				
+			case 'x': /* Initial Condition for x */
+				X0[0] = (double) atof(optarg);
+				break;
+			case 'y': /* Initial Condition for y */
+				X0[1] = (double) atof(optarg);
+				break;
+			case 'z': /* Initial Condition for z */
+				X0[2] = (double) atof(optarg);
+				break;
+				
 			case 'a': /* help */
 			case '?': /* wrong options */
 				fprintf (stderr,
 						 "Usage: lorenzAttractor [OPTION]\n"
-						 "Numerical solution for Lorenz Attractors problem.\n"
+						 "%s\n"
 						 
 						 "\n"
 						 
-						 "  --euler          use explicit Euler method\n"
-						 "  --heun           use Heun Method\n"
-						 "  --rk             use Runge-Kutta 4-4 method\n"
+						 "  -e   --euler				use explicit Euler method\n"
+						 "  -h   --heun					use Heun Method\n"
+						 "  -r   --rk					use Runge-Kutta 4-4 method\n"
 						 
-						 "  --help           display this help and exit\n"
+						 "  -s   --step VALUE			time step\n"
+						 "  -t   --time VALUE			final time\n"
+						 
+						 "  -x   --init-x VALUE			initial condition for x\n"
+						 "  -y   --init-y VALUE			initial condition for y\n"
+						 "  -z   --init-z VALUE			initial condition for z\n"
+
+						 "  -a   --help					display this help and exit\n"
 						 
 						 "\n"
-						 "Reports bugs at http://code.google.com/p/numerical-lorenz-attractor/\n");
+						 "Reports bugs at %s\n",
+						 "Numerical solution for Lorenz Attractors problem.",
+						 "http://code.google.com/p/numerical-lorenz-attractor/");
 				return (c != 'a'); /* success or failure */
 		}
 	}
 
 	/* Main part */
-	for(t = 0; t < T; t++)
+	for(i = 0; i < N; i++)
 	{
+		printf("%f", X0[i]);
+		if(i == (N - 1)) putchar('\n');
+		else putchar(' ');
+	}
+	
+	for(t = 0; t < time_final; t++)
+	{
+		/*
+		** Putting the function 'lorenz' and the state variable 'X0' at time 'h*t'
+		** to get the state variable 'X1' at time 'h*(t+1)'.
+		*/
+		numericalMethod(time_step, N, lorenz, time_step*t, X0, X1);
+		copy_vector(N, X1, X0);
+		
 		for(i = 0; i < N; i++)
 		{
 			printf("%f", X0[i]);
 			if(i == (N - 1)) putchar('\n');
 			else putchar(' ');
-		}
-		
-		/*
-		** Putting the function 'lorenz' and the state variable 'X0' at time 'h*t'
-		** to get the state variable 'X1' at time 'h*(t+1)'.
-		*/
-		/* numericalMethod(h, N, lorenz, h*t, X0, X1); */
-		rk(h, N, lorenz, h*t, X0, X1);
-		copy_vector(N, X1, X0);
+		}		
 	}
 
 	return 0;
