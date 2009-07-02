@@ -23,7 +23,7 @@ int main(int argc, char** argv)
 	
 	while (c != EOF)
 	{
-		switch ((c = getopt_long (argc, argv, "ehras:t:x:y:z:", long_options, &option_index)))
+		switch ((c = getopt_long (argc, argv, "d:12h", long_options, &option_index)))
 		{
 			case 'd': /* dimension */
 				N = (int) atoi(optarg);
@@ -39,11 +39,9 @@ int main(int argc, char** argv)
 			case '?': /* wrong options */
 				fprintf (stderr,
 						 "Usage: vectorDiffLength -d [dimension] -1 [file1] -2 [file2]\n"
-						 "\n"
 						 "Reports bugs at %s\n",
-						 "Numerical solution for Lorenz Attractors problem.",
 						 "http://code.google.com/p/numerical-lorenz-attractor/");
-				return (c != 'a'); /* success or failure */
+				return (c != 'h'); /* success or failure */
 		}
 	}
 	if (N == -1 || s1 == NULL || s2 == NULL)
