@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 		{"dimension" , required_argument , NULL , 'd'},
 		{"file1"     , required_argument , NULL , '1'},
 		{"file2"     , required_argument , NULL , '2'},
-		{"help"      , required_argument , NULL , 'h'},
+		{"help"      , no_argument ,       NULL , 'h'},
 		{ NULL }
 	};
 	int option_index = 0;
@@ -23,7 +23,7 @@ int main(int argc, char** argv)
 	
 	while (c != EOF)
 	{
-		switch ((c = getopt_long (argc, argv, "d:12h", long_options, &option_index)))
+		switch ((c = getopt_long (argc, argv, "d:1:2:h", long_options, &option_index)))
 		{
 			case 'd': /* dimension */
 				N = (int) atoi(optarg);
